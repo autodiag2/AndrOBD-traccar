@@ -1,0 +1,20 @@
+**/bin
+**/build
+**/gen
+**/doc
+**/javadoc
+**/.idea
+**/.gradle
+**/.classpath
+**/.project
+**/.settings
+**/.directory
+**/.vscode
+**/*.iml
+local.properties
+*~
+# Ignore Gradle project-specific cache directory
+.gradle
+
+# Ignore Gradle build output directory
+build
