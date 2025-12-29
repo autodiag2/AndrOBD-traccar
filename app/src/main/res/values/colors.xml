@@ -2,4 +2,5 @@
     <color name="status_error">#D32F2F</color>   <!-- red -->
     <color name="status_warning">#F57C00</color> <!-- orange -->
     <color name="status_ok">#2E7D32</color>      <!-- green -->
+    <color name="note_text">#888888</color>
 </resources>

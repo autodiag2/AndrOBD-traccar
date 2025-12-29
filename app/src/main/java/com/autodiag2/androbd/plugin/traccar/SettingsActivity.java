@@ -125,6 +125,12 @@ public class SettingsActivity extends PreferenceActivity {
         status.setTextSize(14f);
         root.addView(status, lp(24));
 
+        TextView note = new TextView(this);
+        note.setText("Note: this plugin depends on AndrOBD GPS plugin");
+        note.setTextSize(13f);
+        note.setTextColor(getResources().getColor(R.color.note_text));
+        root.addView(note, lp(8));
+
         list.addHeaderView(scroll);
         setContentView(list);
 
