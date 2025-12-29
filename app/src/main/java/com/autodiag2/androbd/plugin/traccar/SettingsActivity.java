@@ -15,8 +15,14 @@ import android.util.Log;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
+import android.text.TextWatcher;
+import android.text.Editable;
 
 public class SettingsActivity extends PreferenceActivity {
+
+    private EditText hostEdit;
+    private EditText portEdit;
+    private EditText deviceEdit;
 
     private static LinearLayout.LayoutParams lp(int topMargin) {
         LinearLayout.LayoutParams p =
@@ -55,41 +61,61 @@ public class SettingsActivity extends PreferenceActivity {
         title.setTextSize(20f);
         root.addView(title, lp(0));
 
-        EditText hostEdit = new EditText(this);
-        hostEdit.setHint("ip / hostname");
-        hostEdit.setText("172.20.10.4");
-        hostEdit.setFocusable(true);
-        hostEdit.setFocusableInTouchMode(true);
-        hostEdit.setClickable(true);
-        hostEdit.clearFocus();
-        root.addView(hostEdit, lp(32));
+        this.hostEdit = new EditText(this);
+        String savedHost = SettingsStore.getHost(this);
+        this.hostEdit.setHint("ip / hostname");
+        this.hostEdit.setText(savedHost);
+        this.hostEdit.setFocusable(true);
+        this.hostEdit.setFocusableInTouchMode(true);
+        this.hostEdit.setClickable(true);
+        this.hostEdit.clearFocus();
+        root.addView(this.hostEdit, lp(32));
 
-        EditText portEdit = new EditText(this);
-        portEdit.setHint("port");
-        portEdit.setInputType(InputType.TYPE_CLASS_NUMBER);
-        portEdit.setText("5055");
-        portEdit.setFocusable(true);
-        portEdit.setFocusableInTouchMode(true);
-        portEdit.setClickable(true);
-        portEdit.setOnFocusChangeListener((v, hasFocus) -> {
+        this.portEdit = new EditText(this);
+        this.portEdit.setHint("port");
+        this.portEdit.setInputType(InputType.TYPE_CLASS_NUMBER);
+        int savedPort = SettingsStore.getPort(this);
+        this.portEdit.setText(String.valueOf(savedPort));
+        this.portEdit.setFocusable(true);
+        this.portEdit.setFocusableInTouchMode(true);
+        this.portEdit.setClickable(true);
+        this.portEdit.setOnFocusChangeListener((v, hasFocus) -> {
             if (hasFocus) {
                 v.post(v::requestFocus);
             }
         });
-        root.addView(portEdit, lp(16));
+        root.addView(this.portEdit, lp(16));
 
-        EditText deviceEdit = new EditText(this);
-        deviceEdit.setHint("my device");
-        deviceEdit.setText("some");
-        deviceEdit.setFocusable(true);
-        deviceEdit.setFocusableInTouchMode(true);
-        deviceEdit.setClickable(true);
-        deviceEdit.setOnFocusChangeListener((v, hasFocus) -> {
+        this.deviceEdit = new EditText(this);
+        this.deviceEdit.setHint("my device");
+        String savedDevice = SettingsStore.getDeviceId(this);
+        this.deviceEdit.setText(savedDevice);
+        this.deviceEdit.setFocusable(true);
+        this.deviceEdit.setFocusableInTouchMode(true);
+        this.deviceEdit.setClickable(true);
+        this.deviceEdit.setOnFocusChangeListener((v, hasFocus) -> {
             if (hasFocus) {
                 v.post(v::requestFocus);
             }
         });
-        root.addView(deviceEdit, lp(16));
+        root.addView(this.deviceEdit, lp(16));
+
+        TextWatcher watcher = new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                saveSettings();
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {}
+        };
+
+        hostEdit.addTextChangedListener(watcher);
+        portEdit.addTextChangedListener(watcher);
+        deviceEdit.addTextChangedListener(watcher);
 
         Button connectBtn = new Button(this);
         connectBtn.setText("Connect");
@@ -108,9 +134,9 @@ public class SettingsActivity extends PreferenceActivity {
             status.setText("Checking server…");
             status.setTextColor(getResources().getColor(R.color.status_error));
 
-            String host = hostEdit.getText().toString().trim();
-            String port = portEdit.getText().toString().trim();
-            String device = deviceEdit.getText().toString().trim();
+            String host = this.hostEdit.getText().toString().trim();
+            String port = this.portEdit.getText().toString().trim();
+            String device = this.deviceEdit.getText().toString().trim();
 
             if (host.isEmpty() || port.isEmpty() || device.isEmpty()) {
                 status.setText("Invalid configuration");
@@ -155,5 +181,19 @@ public class SettingsActivity extends PreferenceActivity {
                 }
             }).start();
         });
+    }
+
+    private void saveSettings() {
+        String host = this.hostEdit.getText().toString().trim();
+        String portStr = this.portEdit.getText().toString().trim();
+        String device = this.deviceEdit.getText().toString().trim();
+
+        if (host.isEmpty() || portStr.isEmpty() || device.isEmpty()) return;
+
+        try {
+            int port = Integer.parseInt(portStr);
+            SettingsStore.set(this, host, port, device);
+        } catch (NumberFormatException ignored) {
+        }
     }
 }

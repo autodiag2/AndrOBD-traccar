@@ -7,6 +7,11 @@ import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
+import android.os.Bundle;
+
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 
 import com.fr3ts0n.androbd.plugin.Plugin;
 import com.fr3ts0n.androbd.plugin.PluginInfo;
@@ -16,7 +21,8 @@ public class TraccarIntegration
 		implements
 		Plugin.DataProvider,
 		Plugin.ConfigurationHandler,
-		Plugin.ActionHandler
+		Plugin.ActionHandler,
+		Plugin.DataReceiver
 {
     static final PluginInfo myInfo = new PluginInfo("Traccar",
 		TraccarIntegration.class,
@@ -26,9 +32,12 @@ public class TraccarIntegration
 		"https://github.com/autodiag2/AndrOBD-traccar"
 	);
 
+	private OkHttpClient http;
+
     @Override
 	public void onCreate() {
 		super.onCreate();
+		http = new OkHttpClient();
     }
 
     @Override
@@ -50,7 +59,82 @@ public class TraccarIntegration
 
     @Override
 	public void performAction() {
-		
+
     }
 
+	@Override
+	public void onDataListUpdate(String csvString) {
+
+	}
+
+	private Double lat = null;
+	private Double lon = null;
+	private Float speed = null;
+	private Float bearing = null;
+
+	@Override
+	public void onDataUpdate(String key, String value) {
+
+		try {
+			if ("GPS_LATITUDE".equals(key)) {
+				lat = Double.parseDouble(value);
+
+			} else if ("GPS_LONGITUDE".equals(key)) {
+				lon = Double.parseDouble(value);
+
+			} else if ("GPS_SPEED".equals(key)) {
+				speed = Float.parseFloat(value);
+
+			} else if ("GPS_BEARING".equals(key)) {
+				bearing = Float.parseFloat(value);
+			}
+
+		} catch (NumberFormatException e) {
+			return;
+		}
+
+		if (lat != null && lon != null) {
+			sendToTraccar(
+					lat,
+					lon,
+					speed != null ? speed : 0f,
+					bearing != null ? bearing : 0f
+			);
+		}
+	}
+
+	private void sendToTraccar(double lat, double lon, float speed, float bearing) {
+
+        String host = SettingsStore.getHost(getApplicationContext());
+        int port = SettingsStore.getPort(getApplicationContext());
+        String deviceId = SettingsStore.getDeviceId(getApplicationContext());
+
+        if (host == null || deviceId == null) return;
+
+        String url =
+                "http://" + host + ":" + port +
+                "/?id=" + deviceId +
+                "&lat=" + lat +
+                "&lon=" + lon +
+                "&speed=" + speed +
+                "&bearing=" + bearing;
+
+        new Thread(() -> {
+			Log.d("TraccarIntegration", "Sending to: " + url);
+            try {
+                Request req = new Request.Builder()
+                        .url(url)
+                        .get()
+                        .build();
+
+                Response resp = http.newCall(req).execute();
+                resp.close();
+
+                Log.d("TraccarIntegration", "Position sent to Traccar");
+
+            } catch (Exception e) {
+                Log.e("TraccarIntegration", "Failed to send to Traccar", e);
+            }
+        }).start();
+    }
 }
