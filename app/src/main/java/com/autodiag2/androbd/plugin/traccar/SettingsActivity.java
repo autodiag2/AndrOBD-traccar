@@ -34,13 +34,20 @@ public class SettingsActivity extends PreferenceActivity {
 
         ListView list = new ListView(this);
         list.setId(android.R.id.list);
+        list.setFocusable(false);
+        list.setFocusableInTouchMode(false);
 
         ScrollView scroll = new ScrollView(this);
         scroll.setFillViewport(true);
+        scroll.setOnTouchListener((v, event) -> {
+            v.requestFocus();
+            return false;
+        });
 
         LinearLayout root = new LinearLayout(this);
         root.setOrientation(LinearLayout.VERTICAL);
         root.setPadding(48, 48, 48, 48);
+        root.setDescendantFocusability(ViewGroup.FOCUS_AFTER_DESCENDANTS);
         scroll.addView(root);
 
         TextView title = new TextView(this);
@@ -51,17 +58,37 @@ public class SettingsActivity extends PreferenceActivity {
         EditText hostEdit = new EditText(this);
         hostEdit.setHint("ip / hostname");
         hostEdit.setText("172.20.10.4");
+        hostEdit.setFocusable(true);
+        hostEdit.setFocusableInTouchMode(true);
+        hostEdit.setClickable(true);
+        hostEdit.clearFocus();
         root.addView(hostEdit, lp(32));
 
         EditText portEdit = new EditText(this);
         portEdit.setHint("port");
         portEdit.setInputType(InputType.TYPE_CLASS_NUMBER);
         portEdit.setText("5055");
+        portEdit.setFocusable(true);
+        portEdit.setFocusableInTouchMode(true);
+        portEdit.setClickable(true);
+        portEdit.setOnFocusChangeListener((v, hasFocus) -> {
+            if (hasFocus) {
+                v.post(v::requestFocus);
+            }
+        });
         root.addView(portEdit, lp(16));
 
         EditText deviceEdit = new EditText(this);
         deviceEdit.setHint("my device");
         deviceEdit.setText("some");
+        deviceEdit.setFocusable(true);
+        deviceEdit.setFocusableInTouchMode(true);
+        deviceEdit.setClickable(true);
+        deviceEdit.setOnFocusChangeListener((v, hasFocus) -> {
+            if (hasFocus) {
+                v.post(v::requestFocus);
+            }
+        });
         root.addView(deviceEdit, lp(16));
 
         Button connectBtn = new Button(this);
