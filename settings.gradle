@@ -12,3 +12,4 @@ plugins {
 
 rootProject.name = 'AndrOBD-traccar'
 include('app')
+include ':plugin'
