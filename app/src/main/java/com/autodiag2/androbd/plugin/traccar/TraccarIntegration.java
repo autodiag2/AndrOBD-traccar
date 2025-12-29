@@ -19,28 +19,25 @@ public class TraccarIntegration
 		Plugin.ActionHandler
 {
     static final PluginInfo myInfo = new PluginInfo("Traccar",
-                                        TraccarIntegration.class,
-                                        "AndrOBD Traccar integration",
-                                        "Copyright (C) 2025 by autodiag2",
-                                        "GPLV3+",
-                                        "https://github.com/autodiag2/AndrOBD-traccar"
+		TraccarIntegration.class,
+		"AndrOBD Traccar integration",
+		"Copyright (C) 2025 by autodiag2",
+		"GPLV3+",
+		"https://github.com/autodiag2/AndrOBD-traccar"
 	);
 
     @Override
 	public void onCreate() {
 		super.onCreate();
-        // should start traccar server
     }
 
     @Override
 	public void onDestroy() {
-        // should stop
 		super.onDestroy();
 	}
 
     @Override
-	public PluginInfo getPluginInfo()
-	{
+	public PluginInfo getPluginInfo() {
 		return myInfo;
 	}
 
@@ -53,7 +50,7 @@ public class TraccarIntegration
 
     @Override
 	public void performAction() {
-
+		
     }
 
 }
