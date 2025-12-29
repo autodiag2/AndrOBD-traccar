@@ -11,6 +11,7 @@ import android.widget.EditText;
 import android.widget.Button;
 import android.widget.ListView;
 
+import android.util.Log;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -93,6 +94,7 @@ public class SettingsActivity extends PreferenceActivity {
             String url = "http://" + host + ":" + port + "/?id=" + device;
 
             new Thread(() -> {
+                Log.d("SettingsActivity", "Trying URL: " + url);
                 try {
                     Request req = new Request.Builder()
                             .url(url)
@@ -104,6 +106,7 @@ public class SettingsActivity extends PreferenceActivity {
                     resp.close();
 
                     runOnUiThread(() -> {
+                        Log.d("SettingsActivity", "Server returned" + code);
                         if (code == 200) {
                             status.setText("Server reachable, device exists");
                             status.setTextColor(getResources().getColor(R.color.status_ok));
@@ -117,6 +120,7 @@ public class SettingsActivity extends PreferenceActivity {
                     });
 
                 } catch (Exception e) {
+                    Log.e("SettingsActivity", "connection failed", e);
                     runOnUiThread(() -> {
                         status.setText("Server not reachable");
                         status.setTextColor(getResources().getColor(R.color.status_error));
