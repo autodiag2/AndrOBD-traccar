@@ -8,7 +8,7 @@ public final class SettingsStore {
     private static final String PREFS = "traccar_settings";
 
     public static String getHost(Context c) {
-        return prefs(c).getString("host", "172.20.10.4");
+        return prefs(c).getString("host", "demo.traccar.org");
     }
 
     public static int getPort(Context c) {
