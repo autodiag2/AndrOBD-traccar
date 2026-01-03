@@ -62,11 +62,6 @@ public class TraccarIntegration
 
     }
 
-	@Override
-	public void onDataListUpdate(String csvString) {
-
-	}
-
 	private Double lat = null;
 	private Double lon = null;
 	private Float speed = null;
@@ -91,6 +86,48 @@ public class TraccarIntegration
 
 		} catch (NumberFormatException e) {
 			return;
+		}
+
+		if (lat != null && lon != null) {
+			sendToTraccar(
+					lat,
+					lon,
+					speed != null ? speed : 0f,
+					bearing != null ? bearing : 0f
+			);
+		}
+	}
+
+	@Override
+	public void onDataListUpdate(String csvString) {
+
+		String[] lines = csvString.split("\n");
+
+		for (String line : lines) {
+			String[] cols = line.split(";");
+			if (cols.length < 3) continue;
+
+			String key = cols[0];
+			String val = cols[2];
+
+			try {
+				switch (key) {
+					case "GPS_LATITUDE":
+						lat = Double.parseDouble(val);
+						break;
+					case "GPS_LONGITUDE":
+						lon = Double.parseDouble(val);
+						break;
+					case "GPS_SPEED":
+						speed = Float.parseFloat(val);
+						break;
+					case "GPS_BEARING":
+						bearing = Float.parseFloat(val);
+						break;
+				}
+			} catch (NumberFormatException e) {
+				continue;
+			}
 		}
 
 		if (lat != null && lon != null) {
