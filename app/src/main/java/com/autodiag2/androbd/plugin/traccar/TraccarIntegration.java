@@ -34,6 +34,11 @@ public class TraccarIntegration
 
 	private OkHttpClient http;
 
+	private Double lat = null;
+	private Double lon = null;
+	private Float speed = null;
+	private Float bearing = null;
+
     @Override
 	public void onCreate() {
 		super.onCreate();
@@ -62,11 +67,6 @@ public class TraccarIntegration
 
     }
 
-	private Double lat = null;
-	private Double lon = null;
-	private Float speed = null;
-	private Float bearing = null;
-
 	@Override
 	public void onDataUpdate(String key, String value) {
 
@@ -92,8 +92,8 @@ public class TraccarIntegration
 			sendToTraccar(
 					lat,
 					lon,
-					speed != null ? speed : 0f,
-					bearing != null ? bearing : 0f
+					speed,
+					bearing
 			);
 		}
 	}
@@ -134,13 +134,20 @@ public class TraccarIntegration
 			sendToTraccar(
 					lat,
 					lon,
-					speed != null ? speed : 0f,
-					bearing != null ? bearing : 0f
+					speed,
+					bearing
 			);
 		}
 	}
 
-	private void sendToTraccar(double lat, double lon, float speed, float bearing) {
+	private void sendToTraccar(double lat, double lon, Float speed, Float bearing) {
+
+		if ( speed == null ) {
+			speed = 0f;
+		}
+		if ( bearing == null ) {
+			bearing = 0f;
+		}
 
         String host = SettingsStore.getHost(getApplicationContext());
         int port = SettingsStore.getPort(getApplicationContext());
